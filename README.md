@@ -21,6 +21,30 @@ This repository demonstrates a secure, credential-less CI/CD pipeline that enfor
 5. Deploy job (only runs if previous succeed) deploys to target (S3/ECS/EKS/Lambda).
 6. CloudTrail logs and SNS notify on suspicious or failed pipeline events.
 
+## High Level Arch Chart 
+Developer  ->  GitHub Repo (source) 
+                └─ .github/workflows/main.yml  (CI pipeline)
+                     │
+                     ├─ Build job (assume BuildRole via OIDC)
+                     │     ├─ fetch source (S3/CodeCommit/Git)
+                     │     ├─ build artifact (app/docker)
+                     │     ├─ push artifact -> ECR / upload -> S3
+                     │     └─ write logs -> CloudWatch
+                     │
+                     ├─ Test job (assume TestRole via OIDC)
+                     │     ├─ download artifact
+                     │     ├─ run tests
+                     │     └─ run Trivy (fail on HIGH/CRITICAL)
+                     │
+                     └─ Deploy job (assume DeployRole via OIDC)
+                           ├─ deploy artifact -> ECS / Lambda / S3 / EKS
+                           └─ post-deploy smoke checks
+AWS Side:
+  - IAM OIDC Provider (token.actions.githubusercontent.com)
+  - IAM Roles: BuildRole, TestRole, DeployRole (trust OIDC with repo/branch conditions)
+  - CloudTrail logs (tracks AssumeRoleWithWebIdentity + API calls)
+  - SNS Topic (alerts), CloudWatch Event rules / Alarms
+  - ECR / S3 / ECS / Lambda resources
 ---
 
 ## Prerequisites
