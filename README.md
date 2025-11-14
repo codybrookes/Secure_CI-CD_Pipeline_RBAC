@@ -39,7 +39,7 @@ Developer  ->  GitHub Repo (source)
                      └─ Deploy job (assume DeployRole via OIDC)
                            ├─ deploy artifact -> ECS / Lambda / S3 / EKS
                            └─ post-deploy smoke checks
-AWS Side:
+-AWS Side:
   - IAM OIDC Provider (token.actions.githubusercontent.com)
   - IAM Roles: BuildRole, TestRole, DeployRole (trust OIDC with repo/branch conditions)
   - CloudTrail logs (tracks AssumeRoleWithWebIdentity + API calls)
